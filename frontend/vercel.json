@@ -1,9 +1,0 @@
-{
-  "outputDirectory": "out",
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://your-backend.onrender.com/:path*"
-    }
-  ]
-}
