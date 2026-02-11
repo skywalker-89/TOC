@@ -9,7 +9,7 @@ import PlayerCards from "@/components/PlayerCards";
 import Pagination from "@/components/Pagination";
 import ViewToggle from "@/components/ViewToggle";
 
-const GITHUB_REPO_URL = "https://github.com/YOUR_USERNAME/premier-league-explorer";
+const GITHUB_REPO_URL = "https://github.com/skywalker-89/TOC";
 
 export default function HomePage() {
   const [players, setPlayers] = useState<Player[]>([]);

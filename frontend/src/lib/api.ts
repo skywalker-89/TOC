@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = "https://toc-yrr0.onrender.com";
 
 import { PlayersResponse, Stats } from "@/types";
 
