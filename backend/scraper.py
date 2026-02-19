@@ -56,10 +56,10 @@ HEADERS = {
 
 REGEX_PLAYER_LINKS = re.compile(
     r'<a\s+href="(/wiki/'
-    r'(?!Category:|Wikipedia:|Help:|Template:|Talk:|Special:|File:|Portal:|User:|Main_Page)'
+    r"(?!Category:|Wikipedia:|Help:|Template:|Talk:|Special:|File:|Portal:|User:|Main_Page)"
     r'[^"#?]+)"'
     r'[^>]*\s+title="([^"]+)"',
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
 # ============================================================================
@@ -72,9 +72,7 @@ REGEX_PLAYER_LINKS = re.compile(
 #   (\d{4}-\d{2}-\d{2})   — capture YYYY-MM-DD format date
 
 REGEX_DATE_OF_BIRTH = re.compile(
-    r'class="bday"[^>]*>'
-    r'[^<]*?(\d{4}-\d{2}-\d{2})',
-    re.IGNORECASE
+    r'class="bday"[^>]*>' r"[^<]*?(\d{4}-\d{2}-\d{2})", re.IGNORECASE
 )
 
 # ============================================================================
@@ -90,10 +88,20 @@ REGEX_DATE_OF_BIRTH = re.compile(
 #   |
 #   (\d+\.\d+)\s*(?:&nbsp;)?m(?:\s|<|$|\()  — capture number.decimal followed by m
 
+# Non-breaking space helper - Wikipedia uses &#160; in real HTML, not just &nbsp;
+_NBSP = r"(?:&nbsp;|&#160;|\s)"
+
 REGEX_HEIGHT = re.compile(
-    r'(\d{2,3})\s*(?:&nbsp;|\s)*cm'
-    r'|(\d\.\d{1,2})\s*(?:&nbsp;|\s)*m(?:\s|<|&|$|\(|\))',
-    re.IGNORECASE
+    rf"\b(1[5-9]\d){_NBSP}*cm\b"  # g1: 185 cm
+    rf"|(\d\.\d{{1,2}}){_NBSP}*m(?:\s|<|&|$|\(|\))"  # g2: 1.85 m
+    r"|height\s*[=:]\s*([\d\.]+)\s*(?:m|meters?|metres?)"  # g3: height=1.85
+    r'|<span\s+class="nowrap">\s*([\d\.]+)\s*m\s*\([^)]+\)\s*</span>'  # g4: <span>
+    rf"|(\d\.\d+){_NBSP}*m{_NBSP}*\(\d+{_NBSP}*ft{_NBSP}*\d+{_NBSP}*in\)"  # g5: 1.85 m (6 ft 1 in)
+    r"|(\d+\.\d+)\s*meter"  # g6: 1.85 meter
+    r"|(\d+)\s*centimeters?"  # g7: 185 centimeters
+    rf"|<th[^>]*Height[^>]*>.*?<td[^>]*>\s*([\d\.]{{1,4}}){_NBSP}*m"  # g8: <th>Height
+    rf"|<td[^>]*>\s*(1\.[5-9]\d|2\.[0-2]\d){_NBSP}+m{_NBSP}*\(",  # g9: infobox-data td
+    re.IGNORECASE | re.DOTALL,
 )
 
 # ============================================================================
@@ -114,20 +122,17 @@ REGEX_HEIGHT = re.compile(
 #                          — capture known position keywords
 
 REGEX_POSITION = re.compile(
-    r'Position\s*</th>'
-    r'.*?<td[^>]*>'
-    r'(.*?)</td>',
-    re.IGNORECASE | re.DOTALL
+    r"Position\s*</th>" r".*?<td[^>]*>" r"(.*?)</td>", re.IGNORECASE | re.DOTALL
 )
 
 # Sub-pattern to clean position text from HTML tags
 REGEX_POSITION_CLEAN = re.compile(
-    r'(Goalkeeper|Defender|Midfielder|Forward|Striker|Winger|'
-    r'Centre[- ]back|Full[- ]back|Left[- ]back|Right[- ]back|'
-    r'Attacking\s+midfielder|Defensive\s+midfielder|Central\s+midfielder|'
-    r'Left\s+winger|Right\s+winger|Centre[- ]forward|Left\s+midfielder|'
-    r'Right\s+midfielder|Sweeper|Wing[- ]?back)',
-    re.IGNORECASE
+    r"(Goalkeeper|Defender|Midfielder|Forward|Striker|Winger|"
+    r"Centre[- ]back|Full[- ]back|Left[- ]back|Right[- ]back|"
+    r"Attacking\s+midfielder|Defensive\s+midfielder|Central\s+midfielder|"
+    r"Left\s+winger|Right\s+winger|Centre[- ]forward|Left\s+midfielder|"
+    r"Right\s+midfielder|Sweeper|Wing[- ]?back)",
+    re.IGNORECASE,
 )
 
 # ============================================================================
@@ -141,9 +146,9 @@ REGEX_POSITION_CLEAN = re.compile(
 #   Then capture the text content, stripping wikilinks [[...]]
 
 REGEX_BIRTHPLACE = re.compile(
-    r'(?:Place\s+of\s+birth|Born)\s*</(?:th|div)>'
-    r'.*?<(?:td|div)[^>]*>\s*(.*?)\s*</(?:td|div)>',
-    re.IGNORECASE | re.DOTALL
+    r"(?:Place\s+of\s+birth|Born)\s*</(?:th|div)>"
+    r".*?<(?:td|div)[^>]*>\s*(.*?)\s*</(?:td|div)>",
+    re.IGNORECASE | re.DOTALL,
 )
 
 # ============================================================================
@@ -158,30 +163,30 @@ REGEX_BIRTHPLACE = re.compile(
 #   </td>                  — end of data cell
 
 REGEX_FULL_NAME = re.compile(
-    r'Full\s*name\s*</th>'
-    r'.*?<td[^>]*>\s*(.*?)\s*</td>',
-    re.IGNORECASE | re.DOTALL
+    r"Full\s*name\s*</th>" r".*?<td[^>]*>\s*(.*?)\s*</td>", re.IGNORECASE | re.DOTALL
 )
 
 # Helper: strip HTML tags from extracted text
-REGEX_HTML_TAGS = re.compile(r'<[^>]+>')
-REGEX_WHITESPACE = re.compile(r'\s+')
-REGEX_WIKI_REF = re.compile(r'\[\s*(?:\d+|citation needed|note \d+)\s*\]', re.IGNORECASE)
+REGEX_HTML_TAGS = re.compile(r"<[^>]+>")
+REGEX_WHITESPACE = re.compile(r"\s+")
+REGEX_WIKI_REF = re.compile(
+    r"\[\s*(?:\d+|citation needed|note \d+)\s*\]", re.IGNORECASE
+)
 
 # Regex for finding next page link in category pages
 REGEX_NEXT_PAGE = re.compile(
     r'<a[^>]+href="(/w/index\.php\?title=Category:Premier_League_players&amp;pagefrom=[^"]+)"[^>]*>next page</a>',
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
 
 def clean_text(html_text: str) -> str:
     """Remove HTML tags, wiki references, and normalize whitespace."""
-    text = REGEX_WIKI_REF.sub('', html_text)
-    text = REGEX_HTML_TAGS.sub(' ', text)
-    text = text.replace('&nbsp;', ' ').replace('&amp;', '&')
-    text = text.replace('&#160;', ' ').replace('&#91;', '[').replace('&#93;', ']')
-    text = REGEX_WHITESPACE.sub(' ', text)
+    text = REGEX_WIKI_REF.sub("", html_text)
+    text = REGEX_HTML_TAGS.sub(" ", text)
+    text = text.replace("&nbsp;", " ").replace("&amp;", "&")
+    text = text.replace("&#160;", " ").replace("&#91;", "[").replace("&#93;", "]")
+    text = REGEX_WHITESPACE.sub(" ", text)
     return text.strip()
 
 
@@ -226,7 +231,7 @@ def get_player_urls() -> list[tuple[str, str]]:
         matches = REGEX_PLAYER_LINKS.findall(cat_section)
 
         for url_path, title in matches:
-            if url_path not in seen_urls and ':' not in url_path.split('/wiki/')[-1]:
+            if url_path not in seen_urls and ":" not in url_path.split("/wiki/")[-1]:
                 seen_urls.add(url_path)
                 full_url = f"{BASE_URL}{url_path}"
                 player_urls.append((full_url, title))
@@ -236,7 +241,7 @@ def get_player_urls() -> list[tuple[str, str]]:
         # Find "next page" link
         next_match = REGEX_NEXT_PAGE.search(html)
         if next_match and len(player_urls) < TARGET_PLAYER_COUNT:
-            next_path = next_match.group(1).replace('&amp;', '&')
+            next_path = next_match.group(1).replace("&amp;", "&")
             page_url = f"{BASE_URL}{next_path}"
             time.sleep(REQUEST_DELAY)
         else:
@@ -268,7 +273,14 @@ def extract_player_data(url: str, display_name: str) -> dict | None:
     # --- REGEX PATTERN 6: Full Name ---
     name_match = REGEX_FULL_NAME.search(html)
     if name_match:
-        player["full_name"] = clean_text(name_match.group(1))
+        name = clean_text(name_match.group(1))
+        # Remove Wikipedia citation references [number] or [citation needed]
+        name = re.sub(r"\s*\[\s*\d+\s*\]\s*", "", name)
+        name = re.sub(
+            r"\s*\[\s*citation\s+needed\s*\]\s*", "", name, flags=re.IGNORECASE
+        )
+        if name and len(name) < 100:
+            player["full_name"] = name.strip()
 
     if not player["full_name"]:
         player["full_name"] = display_name
@@ -281,12 +293,30 @@ def extract_player_data(url: str, display_name: str) -> dict | None:
     # --- REGEX PATTERN 3: Height ---
     height_match = REGEX_HEIGHT.search(html)
     if height_match:
-        if height_match.group(1):  # cm value
-            player["height"] = f"{height_match.group(1)} cm"
-        elif height_match.group(2):  # m value
-            meters = float(height_match.group(2))
-            cm = int(meters * 100)
-            player["height"] = f"{cm} cm"
+        cm_value = None
+        g = height_match.groups()
+
+        if g[0]:
+            cm_value = int(g[0])  # 185 cm
+        elif g[1]:
+            cm_value = int(float(g[1]) * 100)  # 1.85 m
+        elif g[2]:
+            cm_value = int(float(g[2]) * 100)  # height=1.85
+        elif g[3]:
+            cm_value = int(float(g[3]) * 100)  # <span>
+        elif g[4]:
+            cm_value = int(float(g[4]) * 100)  # 1.85 m (6 ft 1 in)
+        elif g[5]:
+            cm_value = int(float(g[5]) * 100)  # 1.85 meter
+        elif g[6]:
+            cm_value = int(g[6])  # 185 centimeters
+        elif g[7]:
+            cm_value = int(float(g[7]) * 100)  # <th>Height
+        elif g[8]:
+            cm_value = int(float(g[8]) * 100)  # infobox-data td
+
+        if cm_value and 150 <= cm_value <= 220:
+            player["height"] = f"{cm_value} cm"
 
     # --- REGEX PATTERN 4: Position ---
     pos_match = REGEX_POSITION.search(html)
@@ -305,15 +335,30 @@ def extract_player_data(url: str, display_name: str) -> dict | None:
     if bp_match:
         place = clean_text(bp_match.group(1))
         # Remove coordinate data if present
-        place = re.sub(r'\d+°\d+.*', '', place).strip()
+        place = re.sub(r"\d+°\d+.*", "", place).strip()
+        # Remove Wikipedia citation references [number] or [citation needed]
+        place = re.sub(r"\s*\[\s*\d+\s*\]\s*", "", place)
+        place = re.sub(
+            r"\s*\[\s*citation\s+needed\s*\]\s*", "", place, flags=re.IGNORECASE
+        )
         if place and len(place) < 100:
-            player["place_of_birth"] = place
+            player["place_of_birth"] = place.strip()
 
     # Derive nationality from place of birth or page content
     if player["place_of_birth"]:
-        parts = [p.strip() for p in player["place_of_birth"].split(',')]
+        parts = [p.strip() for p in player["place_of_birth"].split(",")]
         if parts:
-            player["nationality"] = parts[-1]
+            # Clean nationality by removing citation references like [ 3 ]
+            nationality = parts[-1]
+            # Remove Wikipedia citation references [number] or [citation needed]
+            nationality = re.sub(r"\s*\[\s*\d+\s*\]\s*", "", nationality)
+            nationality = re.sub(
+                r"\s*\[\s*citation\s+needed\s*\]\s*",
+                "",
+                nationality,
+                flags=re.IGNORECASE,
+            )
+            player["nationality"] = nationality.strip()
 
     # Check we have at least some useful data
     fields_filled = sum(1 for v in player.values() if v is not None)
