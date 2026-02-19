@@ -61,7 +61,7 @@ export default function SearchBar({
           type="text"
           value={localValue}
           onChange={handleChange}
-          placeholder="Search by name, position, or nationality..."
+          placeholder="Search by name or position"
           className="w-full pl-12 pr-12 py-4 bg-card border border-border rounded-2xl
                      text-white placeholder:text-muted text-sm
                      focus:outline-none focus:border-border-hover focus:ring-1 focus:ring-border-hover
@@ -79,8 +79,18 @@ export default function SearchBar({
                        transition-all duration-200"
             aria-label="Clear search"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         )}
